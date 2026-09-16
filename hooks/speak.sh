@@ -95,4 +95,26 @@ case "$event" in
     afplay /System/Library/Sounds/Glass.aiff >/dev/null 2>&1
     say "[[volm $VOL]] Claude needs your attention"
     ;;
+  PreToolUse)
+    printf '%s' "$payload" >/tmp/claude-pretool-payload.json
+    # Mid-turn status callouts — spoken versions of the transcript's inline
+    # status lines. Throttled: at most one every 20s, or bursts machine-gun.
+    now=$(date +%s)
+    last=$(cat /tmp/claude-speak-throttle 2>/dev/null || echo 0)
+    [ $((now - last)) -lt 20 ] && exit 0
+    tool=$(printf '%s' "$payload" | jq -r '.tool_name // ""')
+    line=""
+    case "$tool" in
+      Bash)       line=$(printf '%s' "$payload" | jq -r '.tool_input.description // empty' | clean) ;;
+      Edit|Write) f=$(printf '%s' "$payload" | jq -r '.tool_input.file_path // empty'); [ -n "$f" ] && line="editing ${f##*/}" ;;
+      Skill)      line="running $(printf '%s' "$payload" | jq -r '.tool_input.skill // "a skill"')" ;;
+      WebSearch)  line="searching the web" ;;
+      WebFetch)   line="reading a page" ;;
+      Workflow)   line="starting a workflow" ;;
+      mcp__*)     srv=$(printf '%s' "$tool" | awk -F'__' '{print $2}' | tr '_' ' '); line="calling $srv" ;;
+    esac
+    [ -z "$line" ] && exit 0
+    echo "$now" >/tmp/claude-speak-throttle
+    say "[[volm $VOL]] ${line:0:80}"
+    ;;
 esac
