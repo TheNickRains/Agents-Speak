@@ -6,5 +6,7 @@
 !.gitignore
 !hooks/
 !hooks/*
+!commands/
+!commands/*
 # Runtime mute flag for the audio channel, not config
 hooks/speak.off
