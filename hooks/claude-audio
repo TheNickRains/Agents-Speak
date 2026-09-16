@@ -1,0 +1,22 @@
+#!/bin/bash
+# Toggle the Claude Code spoken status channel (~/.claude/hooks/speak.sh).
+# Usage: claude-audio on | off | status
+FLAG="$HOME/.claude/hooks/speak.off"
+case "$1" in
+  on)
+    rm -f "$FLAG"
+    say "[[volm 0.5]] audio on"
+    echo "audio on"
+    ;;
+  off)
+    touch "$FLAG"
+    echo "audio off"
+    ;;
+  status|"")
+    [ -f "$FLAG" ] && echo "audio off" || echo "audio on"
+    ;;
+  *)
+    echo "usage: claude-audio on|off|status" >&2
+    exit 1
+    ;;
+esac

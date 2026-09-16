@@ -1,0 +1,10 @@
+# Allowlist: track only the hooks. Everything else in ~/.claude is runtime
+# state (sessions, transcripts, caches) or secrets — never commit it.
+# settings.json is deliberately NOT tracked: it currently holds a plaintext
+# API key (fallback block). Strip the key first if you ever want it in git.
+*
+!.gitignore
+!hooks/
+!hooks/*
+# Runtime mute flag for the audio channel, not config
+hooks/speak.off
